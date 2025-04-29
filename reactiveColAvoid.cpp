@@ -47,9 +47,12 @@ void process_LiDAR(const sensor_msgs::LaserScan::ConstPtr& scan_msg, std::vector
             j++;
         }
 
-        if (gapsize > 19 ) { // need the gap size to result in the perpendicular length to midpoint line to be at least 2.5 car width 
+        if (gapsize > 38 ) { // need the gap size to result in the perpendicular length to midpoint line to be at least 2.5 car width 
                              // assuming 20cm car width and angle increment of 0.00436 radians (0.25 degrees)
-            for (size_t z = 0; z < 2; ++z) {
+                             // equation for gapsize = 2 *  (arcsin(1.25*carwidth/shortest possible gap distance) / 0.00436 radians)
+                             // this results in a gap size of 38 consecutive hits over 3m
+
+            for (size_t z = 0; z < 2; z++) {
                 // Populate the 'gapsMid' array with the mid-point angle and distance pair
                 gapsMid [j - gapsize/2, z] = gaps[j - gapsize/2, z]
             }
