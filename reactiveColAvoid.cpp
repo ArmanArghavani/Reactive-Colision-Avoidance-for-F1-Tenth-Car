@@ -1,6 +1,11 @@
-#include <sensor_msgs/LaserScan.h>
+#pragma once
+
+#include <rclcpp/rclcpp.hpp>                                 // Core ROS2 C++ API :contentReference[oaicite:0]{index=0}
+#include <sensor_msgs/msg/laser_scan.hpp>                    // sensor_msgs::msg::LaserScan :contentReference[oaicite:1]{index=1}
+#include <ackermann_msgs/msg/ackermann_drive_stamped.hpp>    // Change this to whatever runs the drive commands
+#include <your_package/msg/trajectory.hpp>                   //Change this to match the trajectory node we're subscribing to
 #include <vector>
-#include <utility>  // for std::pair
+#include <utility>
 
 /// Function that processes LiDAR data and populates 'gaps' vector with (angle, distance) pairs where distance > 3 meters
 void process_LiDAR(const sensor_msgs::LaserScan::ConstPtr& scan_msg, std::vector<std::pair<double, double>>& gaps, std::vector<std::pair<double, double>>& gapsMid)
@@ -58,4 +63,9 @@ void process_LiDAR(const sensor_msgs::LaserScan::ConstPtr& scan_msg, std::vector
             }
         }
     }
+}
+
+double choosebestgap(std::vector<std::pair<double, double>>& gapsMid, ) { // function that chooses the gap who's angle is closes to the
+                                                                          // angle of the projected trajectory that it's subscribed to          
+    
 }
