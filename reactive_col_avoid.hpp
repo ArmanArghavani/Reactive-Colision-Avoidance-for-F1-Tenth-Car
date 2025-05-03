@@ -6,11 +6,16 @@
 #include <your_package/msg/trajectory.hpp>                   // Projected trajectory message
 #include <vector>
 #include <utility>
+#include <cmath> 
+#include <car.hpp>
+#include <common.hpp>
+#include <sensor_msgs/msg/point_cloud.hpp>   // for sensor_msgs::msg::PointCloud
 
-class ReactiveColAvoid : public rclcpp::Node
+
+class reactiveColAvoid : public rclcpp::Node
 {
 public:
-  ReactiveColAvoid();
+  reactiveColAvoid();
 
 private:
   // LiDAR processing: fills 'gaps' and 'gapsMid'
@@ -19,16 +24,23 @@ private:
     std::vector<std::pair<double, double>>& gaps,
     std::vector<std::pair<double, double>>& gapsMid);
 
-  // Chooses best gap index based on subscribed trajectory
-  int32_t choosebestgap(std::vector<std::pair<double, double>>& gapsMid);
+  // Chooses best gap index based on subscribed trajectory and publishes drive command
+  void chooseBestGap();
 
   // Callbacks
   void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg);
-  void traj_callback(const your_package::msg::Trajectory::SharedPtr traj_msg);
+  void traj_callback(const your_package::msg::PointCloud::SharedPtr /traj_msg);
 
   // Subscriptions & publication
-  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr     scan_sub_;
-  rclcpp::Subscription<your_package::msg::Trajectory>::SharedPtr   traj_sub_;
+
+  sensor_msgs::msg::PointCloud::SharedPtr traj_msg; // might just be /traj_msg
+  bool traj_received_{false};
+
+// Subscriber handle
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud>::SharedPtr traj_sub_;
+
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr      scan_sub_; //Getting errors on these three lines for some reason
+ 
   rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr drive_pub_;
 
   // State
