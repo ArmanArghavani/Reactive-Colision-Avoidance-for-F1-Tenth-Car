@@ -1,50 +1,39 @@
-#pragma once
+#pragma once  // Include guard to prevent multiple inclusions of this header file
 
-#include <rclcpp/rclcpp.hpp>                                 // Core ROS2 C++ API
-#include <sensor_msgs/msg/laser_scan.hpp>                    // sensor_msgs::msg::LaserScan
-#include <ackermann_msgs/msg/ackermann_drive_stamped.hpp>    // Drive command message
-#include <your_package/msg/trajectory.hpp>                   // Projected trajectory message
-#include <vector>
-#include <utility>
-#include <cmath> 
-#include <car.hpp>
-#include <common.hpp>
-#include <sensor_msgs/msg/point_cloud.hpp>   // for sensor_msgs::msg::PointCloud
+#include <rclcpp/rclcpp.hpp>                                 // Core ROS2 C++ API header
+#include <sensor_msgs/msg/laser_scan.hpp>                    // Definition for LaserScan messages
+#include <ackermann_msgs/msg/ackermann_drive_stamped.hpp>    // Definition for Ackermann drive command messages
+#include <your_package/msg/trajectories.hpp>                 // Definition for custom trajectory messages
+#include <vector>                                            // STL vector container
+#include <utility>                                           // STL pair utility
+#include <cmath>                                            // Math functions
 
-
-class reactiveColAvoid : public rclcpp::Node
+class reactiveColAvoid : public rclcpp::Node           // Define class reactiveColAvoid inheriting from ROS2 Node
 {
 public:
-  reactiveColAvoid();
+  reactiveColAvoid() : Node("gap_publisher") {}  // Constructor declaration
 
 private:
   // LiDAR processing: fills 'gaps' and 'gapsMid'
   void process_LiDAR(
-    const sensor_msgs::msg::LaserScan::SharedPtr& scan_msg,
-    std::vector<std::pair<double, double>>& gaps,
-    std::vector<std::pair<double, double>>& gapsMid);
+    const sensor_msgs::msg::LaserScan::SharedPtr& scan_msg,  // Incoming LaserScan message pointer
+    std::vector<std::pair<double, double>>& gaps,            // Output vector for raw gap data
+    std::vector<std::pair<double, double>>& gapsMid);        // Output vector for midpoint gap data
 
-  // Chooses best gap index based on subscribed trajectory and publishes drive command
-  void chooseBestGap();
+  // Chooses best gap based on subscribed trajectory and publishes drive command
+  void chooseBestGap();                                     // Function to select and publish best gap
 
   // Callbacks
-  void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg);
-  void traj_callback(const your_package::msg::PointCloud::SharedPtr /traj_msg);
+  void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg);  // Callback for LiDAR scans
+  void traj_callback(const sensor_msgs::msg::trajectories::SharedPtr traj_msg); // Callback for trajectory updates
 
-  // Subscriptions & publication
-
-  sensor_msgs::msg::PointCloud::SharedPtr traj_msg; // might just be /traj_msg
-  bool traj_received_{false};
-
-// Subscriber handle
-  rclcpp::Subscription<sensor_msgs::msg::PointCloud>::SharedPtr traj_sub_;
-
-  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr      scan_sub_; //Getting errors on these three lines for some reason
- 
-  rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr drive_pub_;
+  // Subscribers & Publisher handles
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr              scan_sub;       // Subscriber to LiDAR
+  rclcpp::Subscription<sensor_msgs::msg::trajectories>::SharedPtr         trajectories;   // Subscriber to trajectory
+  rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr drive_pub;     // Publisher for drive commands
 
   // State
-  your_package::msg::Trajectory         latest_traj_;
-  bool                                  traj_received_{false};
-  std::vector<std::pair<double,double>> last_gaps_;
+  sensor_msgs::msg::trajectories                    latest_traj;     // Stores latest trajectory message
+  bool                                              traj_received_{false};  // Flag to check if trajectory received
+  std::vector<std::pair<double, double>>            gapsMid;         // Vector of midpoints of valid gaps
 };
